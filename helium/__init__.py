@@ -9,13 +9,13 @@ CWD: str = "os.path.dirname(__file__)"
 
 class Handler:
     NAME: str = ""
-    def __init__(self, game: Game):
-        self.game: Game = game
+    def __init__(self, project: Project):
+        self.project: Project = project
     def __getattr__(self, name: str) -> any: # type: ignore
-        path_no_ext: str = os.path.join(self.game.path, self.NAME, name)
+        path_no_ext: str = os.path.join(self.project.path, self.NAME, name)
         path: str = path_no_ext + "." + magnesium.config.getconf("helium.script-extension", "py")
         if os.path.isdir(path_no_ext) and not os.path.exists(path):
-            return type(self.__class__.__name__ + "_" + name, (self.__class__,), {"NAME": os.path.join(self.NAME, name)})(self.game)
+            return type(self.__class__.__name__ + "_" + name, (self.__class__,), {"NAME": os.path.join(self.NAME, name)})(self.project)
         spec: importlib.util.Spec | None = importlib.util.spec_from_file_location(name, path) # type: ignore
         if spec is None:
             raise FileNotFoundError(f"Script '{name}' not found at path '{path}'")
@@ -25,20 +25,20 @@ class Handler:
 
 class ScriptHandler(Handler):
     NAME: str = "scripts"
-    def __init__(self, game: Game):
-        self.game: Game = game
+    def __init__(self, project: Project):
+        self.project: Project = project
     def __getattr__(self, name: str) -> callable | Handler: # type: ignore
         attribute_return: any = super().__getattr__(name) # type: ignore
         if isinstance(attribute_return, Handler):
             return attribute_return
         elif callable(attribute_return):
-            return lambda *args, **kwargs: attribute_return(self.game, *args, **kwargs)
+            return lambda *args, **kwargs: attribute_return(self.project, *args, **kwargs)
         raise TypeError(f"Script '{name}' is not a function")
     
 class ResourceHandler(Handler):
     NAME: str = "resources"
-    def __init__(self, game: Game):
-        self.game: Game = game
+    def __init__(self, project: Project):
+        self.project: Project = project
     def __getattr__(self, name: str) -> type | Handler:
         attribute_return: any = super().__getattr__(name) # type: ignore
         if isinstance(attribute_return, (type, Handler)):
