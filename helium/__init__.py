@@ -45,12 +45,12 @@ class ResourceHandler(Handler):
             return attribute_return
         raise TypeError(f"Resource '{name}' is not a class")
 
-class Game:
+class Project:
     def __init__(self, cwd: str, name: str):
         self.name: str = name
         self.path: str = os.path.abspath(os.path.join(cwd, self.name))
         if not os.path.exists(self.path):
-            raise FileNotFoundError(f"Game '{self.name}' not found at path '{self.path}'")
+            raise FileNotFoundError(f"Project '{self.name}' not found at path '{self.path}'")
         self.script: ScriptHandler = ScriptHandler(self)
         self.res: ResourceHandler = ResourceHandler(self)
     def getsetting(self, name: str) -> str:
