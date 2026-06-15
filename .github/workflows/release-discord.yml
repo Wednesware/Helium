@@ -20,7 +20,7 @@ jobs:
           -X POST \
           -d "{
             \"embeds\": [{
-              \"title\": \"🚀 Nitrogen $RELEASE_NAME out now!\",
+              \"title\": \"🚀 Helium $RELEASE_NAME out now!\",
               \"description\": \"\",
               \"url\": \"$URL\",
               \"color\": 5814783
