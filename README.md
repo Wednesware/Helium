@@ -1,5 +1,5 @@
 # Wednesware Helium
 
-Lightweight project creation framework.
+Game and project creation framework.
 
-## [REQUIRES MAGNESIUM FRAMEWORK](https://github.com/Wednesware/Magnesium)
+## [REQUIRES MAGNESIUM FRAMEWORK](https://wednesware.github.io/home#magnesium)
