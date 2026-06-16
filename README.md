@@ -1,6 +1,6 @@
 # Wednesware Helium
 
-Game and project creation framework.
+Game and project creation library.
 
 ## Usage
 
