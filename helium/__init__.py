@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import os
 import importlib, importlib.util
-import magnesium, magnesium.config # type: ignore
+
+from ww.mg.config import getconf, objectnotation
 
 
 CWD: str = "os.path.dirname(__file__)"
@@ -13,7 +14,7 @@ class Handler:
         self.project: Project = project
     def __getattr__(self, name: str) -> any: # type: ignore
         path_no_ext: str = os.path.join(self.project.path, self.NAME, name)
-        path: str = path_no_ext + "." + magnesium.config.getconf("helium.script-extension", "py")
+        path: str = path_no_ext + "." + getconf("helium.script-extension", "py")
         if os.path.isdir(path_no_ext) and not os.path.exists(path):
             return type(self.__class__.__name__ + "_" + name, (self.__class__,), {"NAME": os.path.join(self.NAME, name)})(self.project)
         spec: importlib.util.Spec | None = importlib.util.spec_from_file_location(name, path) # type: ignore
@@ -54,4 +55,4 @@ class Project:
         self.script: ScriptHandler = ScriptHandler(self)
         self.res: ResourceHandler = ResourceHandler(self)
     def getsetting(self, name: str) -> str:
-        return magnesium.config.objectnotation(os.path.join(self.path, "settings.pyon")).get(name)
+        return objectnotation(os.path.join(self.path, "settings.pyon")).get(name)
