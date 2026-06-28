@@ -6,8 +6,6 @@ import importlib, importlib.util
 from ww.mg.config import objectnotation
 
 
-CWD: str = "os.path.dirname(__file__)"
-
 class Handler:
     NAME: str = ""
     def __init__(self, project: Project):
