@@ -50,5 +50,6 @@ class project:
             raise FileNotFoundError(f"Project '{self.name}' not found at path '{self.path}'")
         self.script: scripthandler = scripthandler(self)
         self.res: resourcehandler = resourcehandler(self)
+        self.metadata: dict[str, any] = {}
     def getsetting(self, name: str) -> str:
         return objectnotation(os.path.join(self.path, "settings.pyon")).get(name)
