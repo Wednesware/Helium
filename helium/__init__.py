@@ -2,14 +2,12 @@ from __future__ import annotations
 
 import os
 import importlib, importlib.util
+from ww.mg.config import objectnotation # type: ignore
 
-from ww.mg.config import objectnotation
-
-
-class Handler:
+class handler:
     NAME: str = ""
-    def __init__(self, project: Project):
-        self.project: Project = project
+    def __init__(self, project: project):
+        self.project: project = project
     def __getattr__(self, name: str) -> any: # type: ignore
         path_no_ext: str = os.path.join(self.project.path, self.NAME, name)
         path: str = f"{path_no_ext}.py"
@@ -22,35 +20,35 @@ class Handler:
         spec.loader.exec_module(script)
         return getattr(script, name)
 
-class ScriptHandler(Handler):
+class scripthandler(handler):
     NAME: str = "scripts"
-    def __init__(self, project: Project):
-        self.project: Project = project
-    def __getattr__(self, name: str) -> callable | Handler: # type: ignore
+    def __init__(self, project: project):
+        self.project: project = project
+    def __getattr__(self, name: str) -> callable | handler: # type: ignore
         attribute_return: any = super().__getattr__(name) # type: ignore
-        if isinstance(attribute_return, Handler):
+        if isinstance(attribute_return, handler):
             return attribute_return
         elif callable(attribute_return):
             return lambda *args, **kwargs: attribute_return(self.project, *args, **kwargs)
         raise TypeError(f"Script '{name}' is not a function")
     
-class ResourceHandler(Handler):
+class resourcehandler(handler):
     NAME: str = "resources"
-    def __init__(self, project: Project):
-        self.project: Project = project
-    def __getattr__(self, name: str) -> type | Handler:
+    def __init__(self, project: project):
+        self.project: project = project
+    def __getattr__(self, name: str) -> type | handler:
         attribute_return: any = super().__getattr__(name) # type: ignore
-        if isinstance(attribute_return, (type, Handler)):
+        if isinstance(attribute_return, (type, handler)):
             return attribute_return
         raise TypeError(f"Resource '{name}' is not a class")
 
-class Project:
+class project:
     def __init__(self, cwd: str, name: str):
         self.name: str = name
-        self.path: str = os.path.abspath(os.path.join(cwd, self.name))
+        self.path: str = os.path.abspath(os.path.join(cwd, "..", self.name))
         if not os.path.exists(self.path):
             raise FileNotFoundError(f"Project '{self.name}' not found at path '{self.path}'")
-        self.script: ScriptHandler = ScriptHandler(self)
-        self.res: ResourceHandler = ResourceHandler(self)
+        self.script: scripthandler = scripthandler(self)
+        self.res: resourcehandler = resourcehandler(self)
     def getsetting(self, name: str) -> str:
         return objectnotation(os.path.join(self.path, "settings.pyon")).get(name)
