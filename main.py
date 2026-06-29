@@ -1,5 +1,5 @@
-from helium import project
+from helium import Project
 
-mygame: project = project(__file__, "mygame")
+mygame: Project = Project(__file__, "mygame")
 
 mygame.script.prints.PrintInfo()

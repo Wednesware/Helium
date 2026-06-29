@@ -17,15 +17,15 @@ Game and project creation library.
 
 main.py:
 ```
-from helium import project
+from helium import Project
 
 
-myproject: project = project(__file__, "myproject") # first arg: always __file__, second arg: name of the directory to host your project in
+project: Project = Project(__file__, "myproject") # first arg: always __file__, second arg: name of the directory to host your project in
 
-GetNumber: callable = myproject.script.IntegerScripts.GetNumber # automatically returns the GetNumber function
+GetNumber: callable = project.script.IntegerScripts.GetNumber # automatically returns the GetNumber function
 number: int = GetNumber() # example: 3
 
-test_object: myproject.res.TestClass = myproject.res.TestClass() # creates an instance of TestClass
+test_object: project.res.TestClass = project.res.TestClass() # creates an instance of TestClass
 
 print(test_object.s) # outputs 'this is a test'
 
@@ -41,8 +41,8 @@ myproject/scripts/IntegerScripts/GetNumber.py:
 import random
 
 
-def GetNumber(myproject) -> int:
-  if myproject.getsetting("alwaysReturn10"):
+def GetNumber(project) -> int:
+  if project.getsetting("alwaysReturn10"):
       return 10
   else:
       return random.randint(1, 10)
