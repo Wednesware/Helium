@@ -3,6 +3,6 @@ import os
 from helium import *
 
 
-game: Game = Game(eval(CWD), "test_game")
+game: Project = Project(__file__, "test_game")
 
 print(game.res.testsubfolder.TestResource.NAME)
