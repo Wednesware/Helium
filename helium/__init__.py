@@ -3,8 +3,8 @@ from __future__ import annotations
 import os, sys
 import importlib, importlib.util
 
-from ww.mg.config import ObjectNotation, ObjectNotationError # type: ignore
-from ww.mg.filepath import FilePath
+from ww.mg26_11.config import ObjectNotation, ObjectNotationError # type: ignore
+from ww.mg26_11.filepath import FilePath
 
 
 class Handler:
