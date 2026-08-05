@@ -1,0 +1,16 @@
+{
+    "mod": {
+        "displayName": "CoolMod",
+        "version": "26.1",
+        "description": "very cool mod"
+    },
+    "authors": [{
+      "displayName": "alkli",
+      "contact": {
+        "email": "alkli@wednesware.org",
+        "github": "alklimakes",
+        "discord": ".alkli"
+      },
+    }],
+    "for": "mygame"
+}

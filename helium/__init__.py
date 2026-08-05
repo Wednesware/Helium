@@ -26,6 +26,9 @@ class Handler:
         script = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = script
         spec.loader.exec_module(script)
+        modmancer = getattr(self.project, "modmancer", None)
+        if modmancer is not None:
+            modmancer.patch_module(relative_path, script)
         return getattr(script, name) if self.SAME_NAME_OBJECT else script
     def getFirstMatching(self, query: str) -> any:
         for file in os.listdir(os.path.join(self.project.path, self.NAME)):
@@ -101,6 +104,12 @@ class LibraryHandler(Handler):
     def __getattr__(self, name: str) -> any:
         return super().__getattr__(name) # type: ignore
 
+class ModHandler(Handler):
+    NAME: str = "mods"
+    SAME_NAME_OBJECT: bool = False
+    def __getattr__(self, name: str) -> any:
+        return (super().__getattr__(name)) # type: ignore
+
 class Project:
     def __init__(self, cwd: str, name: str):
         self.name: str = name
@@ -110,7 +119,9 @@ class Project:
         self.script: ScriptHandler = ScriptHandler(self)
         self.res: ResourceHandler = ResourceHandler(self)
         self.lib: LibraryHandler = LibraryHandler(self)
+        self.mod: ModHandler = ModHandler(self)
         self.metadata: dict[str, any] = {}
+        self.modmancer: any = None
     def getsetting(self, name: str, else_value: any = "<raiseerror>", scope: str = "prefer args", arg_names: list[str] | None = None) -> any:
         arg_names = [arg_name.format(name=name, n=name[0]) for arg_name in arg_names or ["--{name}", "-{n}"]]
         args_scope_value: str = "<notfound>"
