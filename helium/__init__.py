@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os, sys, importlib, importlib.util, difflib
 
-from ww.mg26_11.config import ObjectNotation, ObjectNotationError # type: ignore
-from ww.mg26_11.filepath import FilePath
+from ww.mg26_12.config import ObjectNotation, ObjectNotationError # type: ignore
+from ww.mg26_12.filepath import FilePath
 
 
 class Handler:
