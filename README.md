@@ -1,136 +1,171 @@
-# Wednesware Helium
+[![Wednesware](wednesware.png)](https://wednesware.org)
+
+# Helium
 
 Game and project creation library.
 
-# Usage
+## Installation
 
-## Handlers
+> `n2 get helium`
 
-* There are several handlers you can use to access your project files, including `script`, `res`, `lib` and `mod`.
+## Quick start
 
-### `ScriptHandler`
+### Example usage 1: basic project setup
 
-* Accessed via `project.script.<script_name>`
-* Script files must end in `.py` and the script function must have the same name as the file (without extension).
-* Only functions are supported for scripts.
-* Passes the `project` object to the script function automatically as the first argument.
-* `project.script.myCoolScript()` -> `project/scripts/myCoolScript.py:def myCoolScript(project)`
-
-### `ResourceHandler`
-
-* Accessed via `project.res.<resource_name>`
-* Resource files must end in `.py` and the resource class must have the same name as the file (without extension).
-* only classes are supported for resources.
-* Does not pass the `project` object to the resource class automatically.
-* `project.res.myCoolResource` -> `project/resources/myCoolResource.py:class myCoolResource`
-
-### `LibraryHandler`
-* Accessed via `project.lib.<library_name>`
-* Library files must end in `.py`.
-* Instead of returning an object like a function or a class, the `LibraryHandler` returns the Python module itself, so you can access any function or class within the module as you want.
-* `project.lib.myCoolLibrary.myCoolFunction()` -> `project/libraries/myCoolLibrary.py:def myCoolFunction()`
-
-## Getters
-
-* Normally, you would use `.` to access loaders, like `project.script.my.new.script`
-* However, there are alternatives to this approach that each do different things
-
-### `getFirst()`
-
-* Returns the first attribute.
-* `project.script.getFirst().getFirst().getFirst()`
-
-### `getFirstMatching(pattern: str)`
-
-* Returns the first attribute that matches the given pattern.
-* The pattern supports wildcards with `*` anywhere in the string.
-* `project.script.getFirstMatching("my").getFirstMatching("*e*").getFirstMatching("scri*")`
-* `getFirstMatching("*")` is also allowed, but `getFirst()` is preferred in this case.
-
-### `getRandom()`
-
-* Returns a random attribute.
-* `project.script.getRandom().getRandom().getRandom()`
-
-### `getRandomMatching(pattern: str)`
-
-* Returns a random attribute that matches the given pattern.
-* The pattern supports wildcards with `*` anywhere in the string.
-* `project.script.getRandomMatching("my").getRandomMatching("*e*").getRandomMatching("scri*")`
-* `getRandomMatching("*")` is also allowed, but `getRandom()` is preferred in this case.
-
-### `getClosestMatching(pattern: str)`
-
-* Uses an algorithm to find the closest matching attribute to the given pattern.
-* **Always** returns an attribute, even if it is not a close match.
-* `project.script.getClosestMatching("my").getClosestMatching("nwe").getClosestMatching("sc")`
-
-### `getFirstPassing(condition: callable)`
-
-* Returns the first attribute that satisfies the given condition.
-* The condition should be a callable that takes an attribute as an argument and returns a boolean.
-* `project.script.getFirstPassing(lambda x: x.startswith("my"))`
-
-## File Structure
-
-* myproject/ (your project directory)
-  * settings.pyon (project settings file, uses Magnesium PYON)
-  * resources/ (your project resources directory)
-    * TestClass.py (a test class resource)
-  * scripts/ (your project scripts directory)
-    * IntegerScripts/ (a sub-directory, can be called anything that is valid as a Python identifier)
-      * GetNumber.py (a number generator script)
-  * libraries/ (your project libraries directory)
-    * ww/ (a sub-directory, can be called anything that is valid as a Python identifier)
-      * mg26_11/ (a sub-directory, can be called anything that is valid as a Python identifier)
-        * logging.py (example logging module)
-* main.py
-
-Note: Nitrogen 26.41 (and after) supports the `getlib` command, which installs publications directly into `<project>/libraries/ww/`. Additionally, the same releases support the `updlibs` command, which reinstalls publications in `<project>/libraries/ww/`. For more information, see the [Nitrogen documentation](https://github.com/Wednesware/Nitrogen/blob/main/README.md).
-
-main.py:
-```
+```python
 from helium import Project
 
+project: Project = Project(__file__, "mygame")
+project.script.say_hello()
+```
 
-project: Project = Project(__file__, "myproject") # first arg: always __file__, second arg: name of the directory to host your project in
+### Example usage 2: calling a script function from a nested folder
 
-GetNumber: callable = project.script.IntegerScripts.GetNumber # automatically returns the GetNumber function
-number: int = GetNumber() # example: 3
+```python
+from helium import Project
 
-test_object: project.res.TestClass = project.res.TestClass() # creates an instance of TestClass
+project: Project = Project(__file__, "mygame")
 
-mg = project.lib.ww.getFirstMatching("mg*")
-info = mg.logging.info
+GetNumber = project.script.IntegerScripts.GetNumber
+number = GetNumber()
+print(number)
+```
 
-info(test_object.s) # outputs 'this is a test'
+### Example usage 3: loading a resource and reading settings
 
-```
-myproject/settings.pyon
-```
-{
-    "alwaysReturn10": False
-}
-```
-myproject/scripts/IntegerScripts/GetNumber.py:
-```
-import random
+```python
+from helium import Project
 
+project: Project = Project(__file__, "mygame")
 
-def GetNumber(project) -> int:
-  if project.getsetting("alwaysReturn10"):
-      return 10
-  else:
-      return random.randint(1, 10)
+value = project.getsetting("alwaysReturn10", False)
+item = project.res.TestClass()
+print(value)
+print(item.s)
 ```
-myproject/resources/TestClass.py:
+
+## Dependencies
+
+- Python 3.12+
+- Nitrogen 26.62+ (`pip install wwn`)
+
+# Definitions
+
+## `helium`
+
+From the base library, you can import `Project` and related project loaders.
+
+> `from helium import Project, ScriptHandler, ResourceHandler, ModHandler, main`
+
+### `helium:Project(path: str, name: str)`
+
+**For the `path` parameter, always provide `__file__`**. Creates a project wrapper for the directory named `name`, resolved relative to the file path passed in `path`. The `Project` object exposes handlers for scripts, resources, and mods in the project root.
+
+> `project = Project(__file__, "mygame")`
+
+#### `helium:Project.getsetting(name: str, else_value: any = "<raiseerror>", scope: str = "prefer args", arg_names: list[str] | None = None) -> any`
+
+Reads a setting from either CLI arguments or the project's `settings.pyon` file.
+
+- `scope="prefer args"`: use the CLI value if present, otherwise fall back to settings.
+- `scope="only args"`: read only command-line arguments.
+- `scope="only settings"`: read only the settings file.
+- `scope="return both"`: return both the CLI and settings values.
+- `scope="return none"`: return `None` if no value is found.
+
+> `value = project.getsetting("alwaysReturn10", False)`
+>
+> `username = project.getsetting("username", scope="only args")`
+
+### `helium:ScriptHandler`
+
+Accessed via `project.script.<script_name>`. Script files must live under the project's `scripts/` directory and end in `.py`. The function name must match the filename, and the project instance is passed in automatically as the first argument.
+
+> `project.script.say_hello()`
+>
+> `project.script.IntegerScripts.GetNumber()`
+
+#### `helium:ScriptHandler.getFirst()`
+
+Returns the first script or script folder entry found in the `scripts/` directory.
+
+> `project.script.getFirst()`
+
+#### `helium:ScriptHandler.getFirstMatching(pattern: str)`
+
+Returns the first script that matches the provided wildcard pattern. `*` can be used anywhere in the query.
+
+> `project.script.getFirstMatching("my*")`
+>
+> `project.script.getFirstMatching("*hello*")`
+
+#### `helium:ScriptHandler.getRandom()`
+
+Returns a random script entry from the `scripts/` directory.
+
+> `project.script.getRandom()`
+
+#### `helium:ScriptHandler.getRandomMatching(pattern: str)`
+
+Returns a random script whose name matches the pattern.
+
+> `project.script.getRandomMatching("*e*")`
+
+#### `helium:ScriptHandler.getClosestMatching(pattern: str)`
+
+Returns the closest file name match using a similarity algorithm.
+
+> `project.script.getClosestMatching("scr")`
+
+### `helium:ResourceHandler`
+
+Accessed via `project.res.<resource_name>`. Resource files must contain a Python class whose class name matches the filename. The class is returned directly, and the project object is not automatically injected.
+
+> `item = project.res.TestClass()`
+>
+> `item = project.res.testsubfolder.TestResource()`
+
+### `helium:ModHandler`
+
+Accessed via `project.mod.<mod_name>`. Mods are loaded from the project's `mods/` directory and may be packaged as `.modm` archives. Mod patches are applied by `Modmancer`.
+
+> `project.mod.getFirstMatching("*")`
+
+### `helium:main(path: str)`
+
+**For the `path` parameter, always provide `__file__`**. Used to provide a CLI entrypoint to a project. Within your project's base directory, create a `__main__.py` file with the following contents:
+
+```python
+from nitrogen import require
+require("helium").main(__file__)
 ```
-class TestClass:
-    def __init__(self) -> None:
-        self.s: str = "this is a test"
-```
-myproject/libraries/ww/mg26_11/logging.py:
-```
-def info(s: str) -> None:
-    print(s)
-```
+
+The above code handles commands such as `python -m project`. `main` itself creates `Project` instance at `.` relative to the `__file__` provided, then runs the `main` script found within it (`project/scripts/main.py:main`). You may collect the object and the return value of the `main` script easily as follows:
+
+> `project, result = main(__file__)`
+
+## `modmancer`
+
+From this library, you can manage and apply mods to your project using the `Modmancer` class.
+
+> `from helium.modmancer import Modmancer`
+
+### `modmancer:modmancer`
+
+The `Modmancer` class applies runtime patches from `.modm` files. It is initialized with a `Project` and started with `.start()`. This lets mods override, wrap, or synchronize functions and classes in project modules.
+
+> `modm = Modmancer(project)`
+>
+> `modm.start()`
+
+### `modmancer:Modmancer.start()`
+
+Loads all `.modm` archives from the project's `mods/` directory and applies their patches.
+
+> `modm.start()`
+
+### `modmancer:Modmancer.patch_module(relative_path: str, module: any)`
+
+Applies any registered patch information to a loaded module at the given relative path.
+
+> `modm.patch_module("scripts/my_script.py", script_module)`

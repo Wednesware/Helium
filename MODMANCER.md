@@ -1,6 +1,8 @@
+[![Wednesware](wednesware.png)](https://wednesware.org)
+
 # Modmancer
 
-**IMPORTANT: Modmancer is a separate product that now ships exclusively with Helium 26.18+ for convenience.**
+**IMPORTANT: Modmancer is a separate product that now ships in a stripped-down state alongside Helium 26.18+ for convenience.**
 
 # Nitrogen Support
 

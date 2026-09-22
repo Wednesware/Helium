@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import os, sys, importlib, importlib.util, difflib
-
-from ww.mg26_12.config import ObjectNotation, ObjectNotationError # type: ignore
-from ww.mg26_12.filepath import FilePath
+from nitrogen import require
+ObjectNotation = require("magnesium.config").ObjectNotation
+ObjectNotationError = require("magnesium.config").ObjectNotationError
+FilePath = require("magnesium.filepath").FilePath
+#from ww.mg26_12.config import ObjectNotation # type: ignore
+#from ww.mg26_12.filepath import FilePath
 
 
 class Handler:
@@ -98,15 +101,6 @@ class ResourceHandler(Handler):
             return attribute_return
         raise TypeError(f"Resource '{name}' is not a class")
 
-class LibraryHandler(Handler):
-    NAME: str = "libraries"
-    SAME_NAME_OBJECT: bool = False
-    def __getattr__(self, name: str) -> any:
-        try:
-            return super().__getattr__(name) # type: ignore
-        except FileNotFoundError:
-            return getattr(super().__getattr__("__init__"), name) # type: ignore
-
 class ModHandler(Handler):
     NAME: str = "mods"
     SAME_NAME_OBJECT: bool = False
@@ -114,14 +108,13 @@ class ModHandler(Handler):
         return (super().__getattr__(name)) # type: ignore
 
 class Project:
-    def __init__(self, cwd: str, name: str):
+    def __init__(self, path: str, name: str):
         self.name: str = name
-        self.path: str = os.path.abspath(os.path.join(cwd, "..", self.name))
+        self.path: str = os.path.abspath(os.path.join(path, "..", self.name))
         if not os.path.exists(self.path):
             raise FileNotFoundError(f"Project '{self.name}' not found at path '{self.path}'")
         self.script: ScriptHandler = ScriptHandler(self)
         self.res: ResourceHandler = ResourceHandler(self)
-        self.lib: LibraryHandler = LibraryHandler(self)
         self.mod: ModHandler = ModHandler(self)
         self.metadata: dict[str, any] = {}
         self.modmancer: any = None
@@ -135,10 +128,10 @@ class Project:
                 except IndexError:
                     pass
                 break
-        settings_path: FilePath = FilePath(self.path) / "settings.pyon"
+        settings_path: FilePath = FilePath(self.path) / "settings.pyon" # type: ignore
         if not settings_path.exists():
             settings_path.write("{}")
-        settings_on: ObjectNotation = ObjectNotation(settings_path)
+        settings_on: ObjectNotation = ObjectNotation(settings_path) # type: ignore
         settings_scope_value: any = settings_on.get(name, "<notfound>")
         match scope:
             case "only args":
@@ -161,3 +154,7 @@ class Project:
                 raise ValueError(f"setting '{name}' was not provided.")
             return else_value
         return return_value
+    
+def main(path: str) -> tuple[Project, any]:
+    project: Project = Project(path, ".")
+    return (project, project.script.main())

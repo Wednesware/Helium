@@ -1,12 +1,13 @@
 from __future__ import annotations
-
 import builtins, os, tarfile, tempfile, fnmatch, subprocess, threading, importlib.util
+from nitrogen import require
+ObjectNotation = require("magnesium.config").ObjectNotation
+FilePath = require("magnesium.filepath").FilePath
+#from ww.mg26_12.config import ObjectNotation # type: ignore
+#from ww.mg26_12.filepath import FilePath
 
-from ww.mg26_12.config import ObjectNotation # type: ignore
-from ww.mg26_12.filepath import FilePath
 
-
-RESERVED_FILES: set[str] = {"__mod__.py", "modmancer.pyon", "MODINFO.md", "LICENSE.md", ".nitrodep"}
+RESERVED_FILES: set[str] = {"__mod__.py", "modmancer.pyon", "MODINFO.md", "LICENSE.md"}
 ROLES: tuple[str, ...] = ("before", "after", "replace", "syncwith", "delete")
 
 
@@ -104,14 +105,6 @@ class Modmancer:
     def _applies_to_project(self, info: dict) -> bool:
         pattern: str = info.get("for", "*")
         return fnmatch.fnmatch(self.project.name, pattern)
-
-    def _run_nitrodep(self, root: str) -> None:
-        if not os.path.isfile(os.path.join(root, ".nitrodep")):
-            return
-        try:
-            subprocess.run(["n2", "getdep", root], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except OSError:
-            pass # nitrogen (n2) is not installed, skip dependency resolution
 
     def _run_mod_entrypoint(self, root: str) -> None:
         entry_path: str = os.path.join(root, "__mod__.py")
